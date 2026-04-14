@@ -85,9 +85,13 @@ async def fetch_all_pairs(
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
     processed: dict[str, list[Kline]] = {}
-    for result in results:
+    for pair, result in zip(pairs, results, strict=True):
         if isinstance(result, BaseException):
-            logger.error("failed to fetch klines", error=str(result))
+            logger.error(
+                "failed to fetch klines",
+                symbol=pair,
+                error=str(result),
+            )
             continue
         symbol, klines = result
         processed[symbol] = klines
