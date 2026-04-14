@@ -4,6 +4,7 @@ from typing import Any
 import httpx
 import structlog
 from pydantic import BaseModel
+from tenacity import retry, stop_after_attempt, wait_exponential_jitter
 
 logger = structlog.get_logger()
 
@@ -37,6 +38,10 @@ class Kline(BaseModel):
         )
 
 
+@retry(  # type: ignore[misc]  # tenacity lacks complete type stubs
+    stop=stop_after_attempt(3),
+    wait=wait_exponential_jitter(initial=1, max=10),
+)
 async def fetch_klines(
     client: httpx.AsyncClient,
     symbol: str,
