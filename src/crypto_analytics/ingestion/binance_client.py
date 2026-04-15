@@ -6,9 +6,9 @@ import structlog
 from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt, wait_exponential_jitter
 
-logger = structlog.get_logger()
+from crypto_analytics.core.config import settings
 
-BINANCE_BASE_URL = "https://api.binance.com/api/v3"
+logger = structlog.get_logger()
 
 
 class Kline(BaseModel):
@@ -50,7 +50,7 @@ async def fetch_klines(
 ) -> list[Kline]:
     """Fetch klines for a single trading pair from Binance API."""
     response = await client.get(
-        f"{BINANCE_BASE_URL}/klines",
+        f"{settings.binance_base_url}/klines",
         params={
             "symbol": symbol,
             "interval": interval,
@@ -66,7 +66,7 @@ async def fetch_all_pairs(
     pairs: list[str],
     limit: int = 100,
     interval: str = "1m",
-    max_concurrent: int = 5,
+    max_concurrent: int = settings.binance_max_concurrent,
 ) -> dict[str, list[Kline]]:
     """Fetch klines for multiple trading pairs concurrently."""
     semaphore = asyncio.Semaphore(max_concurrent)
