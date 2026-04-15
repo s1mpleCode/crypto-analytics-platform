@@ -20,3 +20,12 @@ lint:
 
 test:
 	uv run pytest
+
+migrate:
+	alembic upgrade head
+
+migration:
+	alembic revision --autogenerate -m "$(name)"
+
+rollback:
+	alembic downgrade -1
